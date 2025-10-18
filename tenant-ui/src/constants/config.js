@@ -7,14 +7,12 @@ export const API_ENDPOINTS = {
 // Type Person Badges
 export const TENANT_TYPES = {
   ARRENDATARIO: 'ARRENDATARIO',
-  PROPIETARIO: 'PROPIETARIO',
-  ADMINISTRADOR: 'ADMINISTRADOR',
+  DUEÑO: 'DUEÑO',
 };
 
 export const TENANT_TYPE_COLORS = {
   ARRENDATARIO: 'bg-blue-100 text-blue-800',
-  PROPIETARIO: 'bg-green-100 text-green-800',
-  ADMINISTRADOR: 'bg-purple-100 text-purple-800',
+  DUEÑO: 'bg-green-100 text-green-800',
 };
 
 // Table Configuration
