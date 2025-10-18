@@ -1,0 +1,10 @@
+cl/maotech/tenantpayment/dto/TenantRequest.class
+cl/maotech/tenantpayment/controller/RestExceptionHandler.class
+cl/maotech/tenantpayment/repository/TenantRepository.class
+cl/maotech/tenantpayment/controller/TenantController.class
+cl/maotech/tenantpayment/entity/PersonType.class
+cl/maotech/tenantpayment/entity/Tenant.class
+cl/maotech/tenantpayment/dto/TenantResponse.class
+cl/maotech/tenantpayment/repository/PersonTypeRepository.class
+cl/maotech/tenantpayment/TenantPaymentApplication.class
+cl/maotech/tenantpayment/service/TenantService.class

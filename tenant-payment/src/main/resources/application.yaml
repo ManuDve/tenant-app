@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: tenant-payment
+
+  datasource:
+    url: jdbc:oracle:thin:@${TNS_NAME}?TNS_ADMIN=${WALLET_DIR}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: oracle.jdbc.OracleDriver
+    # Usar el pool por defecto de Spring Boot (Hikari) para evitar conflictos con UCP en dev
+
+  jpa:
+    database: ORACLE
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8090
