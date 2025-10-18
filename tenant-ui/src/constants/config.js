@@ -8,11 +8,13 @@ export const API_ENDPOINTS = {
 export const TENANT_TYPES = {
   ARRENDATARIO: 'ARRENDATARIO',
   DUEÑO: 'DUEÑO',
+  REPRESENTANTE_LEGAL: 'REPRESENTANTE LEGAL',
 };
 
 export const TENANT_TYPE_COLORS = {
   ARRENDATARIO: 'bg-blue-100 text-blue-800',
   DUEÑO: 'bg-green-100 text-green-800',
+  REPRESENTANTE_LEGAL: 'bg-yellow-100 text-yellow-800',
 };
 
 // Table Configuration
