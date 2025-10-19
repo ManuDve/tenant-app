@@ -20,6 +20,11 @@ class TenantService {
       });
 
       if (!response.ok) {
+        // Si es un error 503, podría ser BD no inicializada
+        if (response.status === 503) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Base de datos no inicializada');
+        }
         throw new Error(
           `Error ${response.status}: ${response.statusText || 'Error desconocido'}`
         );

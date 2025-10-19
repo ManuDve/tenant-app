@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTenants } from '../hooks/useTenants';
 import { TENANT_COLUMNS, TENANT_TYPES } from '../constants/config';
 import TenantRow from './TenantRow';
@@ -8,11 +9,15 @@ import { LoadingSpinner, ErrorAlert, EmptyState } from './ui/StateComponents';
  * Componente principal que renderiza la tabla de arrendatarios con ordenamiento y paginación
  */
 function TenantTable() {
+  const navigate = useNavigate();
   const { tenants, loading, error } = useTenants();
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [filterTipoPersona, setFilterTipoPersona] = useState('todos');
+
+  // Verificar si es error de BD no inicializada
+  const isDbNotInitialized = error && error.includes('no inicializada');
 
   // Función para ordenar
   const handleSort = (columnKey) => {
@@ -68,6 +73,27 @@ function TenantTable() {
 
   if (loading) {
     return <LoadingSpinner />;
+  }
+
+  if (isDbNotInitialized) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-8">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⚠</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Base de Datos No Inicializada</h2>
+          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+            Las tablas de la base de datos no existen. Por favor, vuelve a la página de inicio 
+            y ejecuta el endpoint de seed para inicializar la base de datos.
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+          >
+            Volver a Inicio
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (error) {

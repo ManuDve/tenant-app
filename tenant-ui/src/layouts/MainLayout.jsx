@@ -1,3 +1,5 @@
+import Breadcrumb from '../components/Breadcrumb';
+
 /**
  * Layout principal de la aplicación
  */
@@ -7,6 +9,10 @@ function MainLayout({ children, title, subtitle }) {
       {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-6">
+          {/* Breadcrumb */}
+          <div className="mb-4">
+            <Breadcrumb />
+          </div>
           <h1 className="text-4xl font-bold text-gray-900">{title}</h1>
           {subtitle && <p className="text-gray-600 mt-2">{subtitle}</p>}
         </div>

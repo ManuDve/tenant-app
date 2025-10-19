@@ -2,6 +2,8 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8090';
 export const API_ENDPOINTS = {
   TENANTS: '/api/tenants',
+  ADMIN_CLEAR: '/api/admin/database/clear',
+  ADMIN_SEED: '/api/admin/database/seed',
 };
 
 // Type Person Badges
@@ -19,7 +21,7 @@ export const TENANT_TYPE_COLORS = {
 
 // Table Configuration
 export const TENANT_COLUMNS = [
-  { key: 'numrun', label: 'RUN' },
+  { key: 'numrun', label: 'RUT' },
   { key: 'primerNombre', label: 'Primer Nombre' },
   { key: 'segundoNombre', label: 'Segundo Nombre' },
   { key: 'apellidoPaterno', label: 'Apellido Paterno' },
