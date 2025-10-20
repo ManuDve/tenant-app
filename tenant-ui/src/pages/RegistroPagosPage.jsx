@@ -69,7 +69,7 @@ function RegistroPagosPage() {
       }
 
       const resultado = await pagoService.registrarParcial({
-        annoMes: formData.annoMes,
+        annoMes: parseInt(formData.annoMes),
         idEdif: parseInt(formData.idEdif),
         nroDepto: parseInt(formData.nroDepto),
         monto: monto,
