@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import MainLayout from '../layouts/MainLayout';
 import pagoService from '../services/pagoService';
-import { ErrorAlert } from '../components/ui/StateComponents';
+import edificioService from '../services/edificioService';
+import { ErrorAlert, LoadingSpinner } from '../components/ui/StateComponents';
 
 /**
  * Página para registrar pagos parciales
@@ -13,10 +14,28 @@ function RegistroPagosPage() {
     nroDepto: '',
     monto: '',
   });
+  const [edificios, setEdificios] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingEdificios, setLoadingEdificios] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Cargar edificios al montar
+  useEffect(() => {
+    const cargarEdificios = async () => {
+      try {
+        const data = await edificioService.obtenerTodos();
+        setEdificios(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error cargando edificios:', err);
+        setEdificios([]);
+      } finally {
+        setLoadingEdificios(false);
+      }
+    };
+    cargarEdificios();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -24,6 +43,11 @@ function RegistroPagosPage() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const obtenerNombreEdificio = (idEdif) => {
+    const edif = edificios.find(e => e.idEdif === parseInt(idEdif));
+    return edif ? edif.nombreEdif : `Edificio ${idEdif}`;
   };
 
   const handleSubmit = async (e) => {
@@ -51,8 +75,9 @@ function RegistroPagosPage() {
         monto: monto,
       });
 
+      const nombreEdificio = obtenerNombreEdificio(formData.idEdif);
       setSuccessMessage(
-        `Pago registrado exitosamente. Período: ${formData.annoMes}, Edificio: ${formData.idEdif}, Depto: ${formData.nroDepto}, Monto: $${monto.toLocaleString('es-CL')}`
+        `Pago registrado exitosamente. Período: ${formData.annoMes}, Edificio: ${nombreEdificio}, Depto: ${formData.nroDepto}, Monto: $${monto.toLocaleString('es-CL')}`
       );
       setSuccess(true);
 
@@ -69,6 +94,10 @@ function RegistroPagosPage() {
       setLoading(false);
     }
   };
+
+  if (loadingEdificios) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <MainLayout
@@ -115,20 +144,28 @@ function RegistroPagosPage() {
               </p>
             </div>
 
-            {/* ID Edificio */}
+            {/* Edificio con nombre */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                ID Edificio
+                Edificio
               </label>
-              <input
-                type="number"
+              <select
                 name="idEdif"
                 value={formData.idEdif}
                 onChange={handleInputChange}
-                placeholder="Ej: 1"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
-              />
+              >
+                <option value="">Selecciona un edificio</option>
+                {edificios.map((edif) => (
+                  <option key={edif.idEdif} value={edif.idEdif}>
+                    {edif.nombreEdif} (ID: {edif.idEdif})
+                  </option>
+                ))}
+              </select>
+              {edificios.length === 0 && (
+                <p className="text-xs text-red-500 mt-1">No hay edificios disponibles</p>
+              )}
             </div>
 
             {/* Número de Departamento */}
