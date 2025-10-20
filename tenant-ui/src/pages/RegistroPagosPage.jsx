@@ -9,7 +9,7 @@ import { ErrorAlert, LoadingSpinner } from '../components/ui/StateComponents';
  */
 function RegistroPagosPage() {
   const [formData, setFormData] = useState({
-    annoMes: new Date().toISOString().slice(0, 7).replace('-', ''),
+    annoMes: '202508',
     idEdif: '',
     nroDepto: '',
     monto: '',
@@ -83,7 +83,7 @@ function RegistroPagosPage() {
 
       // Limpiar formulario
       setFormData({
-        annoMes: new Date().toISOString().slice(0, 7).replace('-', ''),
+        annoMes: '202508',
         idEdif: '',
         nroDepto: '',
         monto: '',
