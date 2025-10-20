@@ -5,7 +5,7 @@ import DatabaseControls from '../components/DatabaseControls';
 import morosidadService from '../services/morosidadService';
 import edificioService from '../services/edificioService';
 import tenantService from '../services/tenantService';
-import { LoadingSpinner, ErrorAlert } from '../components/ui/StateComponents';
+import { LoadingSpinner, ErrorAlert } from './ui/StateComponents';
 
 /**
  * HomePage con Dashboard de estadísticas generales y navegación
@@ -52,11 +52,7 @@ function HomePage() {
         // Procesar morosidades
         if (morosidadData.status === 'fulfilled' && Array.isArray(morosidadData.value)) {
           newStats.totalMorosos = morosidadData.value.length;
-          // Intentar calcular deuda desde diferentes campos posibles
-          newStats.totalDeuda = morosidadData.value.reduce((sum, m) => {
-            const deuda = m.montoTotalMoroso || m.deuda || m.montoMoroso || m.monto || m.montoDeuda || 0;
-            return sum + (parseFloat(deuda) || 0);
-          }, 0);
+          newStats.totalDeuda = morosidadData.value.reduce((sum, m) => sum + (m.deuda || 0), 0);
         } else if (morosidadData.status === 'rejected') {
           initialized = false;
         }
@@ -92,7 +88,7 @@ function HomePage() {
     },
     {
       title: 'Morosidades',
-      description: 'Ver lista de residentes con deuda registrada',
+      description: 'Ver lista de deudores con deudas mayores a $100,000',
       path: '/morosidad',
       color: 'bg-red-50 border-red-200 hover:bg-red-100',
       stat: `$${stats.totalDeuda.toLocaleString('es-CL')}`,
@@ -108,7 +104,7 @@ function HomePage() {
     },
     {
       title: 'Auditoría Morosidad',
-      description: 'Historial de cambios en registros de morosidad',
+      description: 'Historial de cambios en morosidades mayores a $100,000',
       path: '/auditoria-morosidad',
       color: 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100',
       stat: '-',
@@ -121,14 +117,6 @@ function HomePage() {
       color: 'bg-purple-50 border-purple-200 hover:bg-purple-100',
       stat: '-',
       statLabel: 'Pagos',
-    },
-    {
-      title: 'Registro de Pagos',
-      description: 'Registrar pagos parciales de morosidades',
-      path: '/registro-pagos',
-      color: 'bg-cyan-50 border-cyan-200 hover:bg-cyan-100',
-      stat: '-',
-      statLabel: 'Nuevo Pago',
     },
     {
       title: 'Flujo de Prueba',

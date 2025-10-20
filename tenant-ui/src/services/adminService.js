@@ -57,6 +57,87 @@ const adminService = {
       throw error;
     }
   },
+
+  /**
+   * Configura el sistema de morosidades
+   * @returns {Promise<Object>} Respuesta del servidor
+   */
+  setupMorosidades: async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}${API_ENDPOINTS.ADMIN_MOROSIDADES}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al configurar morosidades');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Carga datos de morosidad
+   * @returns {Promise<Object>} Respuesta del servidor
+   */
+  cargarDatosMorosidad: async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}${API_ENDPOINTS.ADMIN_DATOS_MOROSIDAD}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al cargar datos de morosidad');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Obtiene diagnóstico del sistema
+   * @returns {Promise<Object>} Respuesta del servidor
+   */
+  obtenerDiagnostico: async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}${API_ENDPOINTS.ADMIN_DIAGNOSTICO}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al obtener diagnóstico');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default adminService;

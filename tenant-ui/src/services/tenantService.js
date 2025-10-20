@@ -66,6 +66,13 @@ class TenantService {
       throw error;
     }
   }
+
+  /**
+   * Alias para getTenants() - mantiene compatibilidad con código existente
+   */
+  async obtenerTodos() {
+    return this.getTenants();
+  }
 }
 
 export default new TenantService();

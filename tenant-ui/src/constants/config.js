@@ -1,9 +1,27 @@
 // API Configuration
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8090';
 export const API_ENDPOINTS = {
-  TENANTS: '/api/tenants',
+  // Admin/Database
   ADMIN_CLEAR: '/api/admin/database/clear',
   ADMIN_SEED: '/api/admin/database/seed',
+  ADMIN_MOROSIDADES: '/api/admin/database/morosidades',
+  ADMIN_DATOS_MOROSIDAD: '/api/admin/database/datos-morosidad',
+  ADMIN_DIAGNOSTICO: '/api/admin/database/diagnostico',
+  
+  // Tenants
+  TENANTS: '/api/tenants',
+  
+  // Morosidades
+  MOROSIDADES_REPORTE: '/api/morosidades/generar-reporte',
+  MOROSIDADES_DETALLE: '/api/morosidades/detalle',
+  MOROSIDADES_AUDITORIA: '/api/morosidades/auditoria',
+  MOROSIDADES_AUDITORIA_PAGOS: '/api/morosidades/auditoria-pagos',
+  
+  // Pagos
+  PAGOS_REGISTRAR: '/api/pagos/registrar-parcial',
+  
+  // Edificios
+  EDIFICIOS: '/api/edificios',
 };
 
 // Type Person Badges

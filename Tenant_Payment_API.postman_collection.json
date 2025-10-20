@@ -1,0 +1,515 @@
+{
+	"info": {
+		"_postman_id": "tenant-payment-morosidades-system",
+		"name": "Sistema de Gestión de Morosidades",
+		"description": "Colección simplificada para el Sistema de Gestión de Morosidades\n\n## Flujo de Inicialización (Primera vez - EN ORDEN):\n1. Limpiar Base de Datos (1.0)\n2. Inicializar Sistema Completo (1.1)\n3. Configurar Sistema de Morosidades (1.2)\n4. Cargar Datos de Morosidad (1.3)\n5. **GENERAR REPORTE DE MOROSIDADES (2a)** ⚠️ CRÍTICO\n6. Verificar Estado (1.4)\n\n## Menú Principal:\n1. Inicializar Base de Datos\n2. Gestionar Morosidades\n3. Gestionar Residentes\n4. Gestionar Edificios\n\n## Variables necesarias:\n- {{base_url}}: http://localhost:8090\n\n## ORDEN CORRECTO:\nEjecuta SIEMPRE en orden: 1.0 → 1.1 → 1.2 → 1.3 → **2a (annoMes: 202510)** → 1.4\n\n⚠️ **IMPORTANTE:** Después del paso 1.3, DEBES ejecutar 2a para poblar DETALLE_MOROSIDAD",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Inicializar Base de Datos",
+			"item": [
+				{
+					"name": "1.0 Limpiar Base de Datos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Base de datos limpiada\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/database/clear",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "database", "clear"]
+						},
+						"description": "**PASO 0 - EJECUTAR PRIMERO:**\n\nLimpia TODAS las tablas de la base de datos.\n\nBorra todos los datos existentes\nElimina todas las tablas\n\n**Cuándo usar:**\n- Primera vez que inicializas el sistema\n- Cuando necesites empezar desde cero\n- Cuando hay datos corruptos\n\n**IMPORTANTE:** Después de ejecutar esto, DEBES ejecutar en orden:\n1.1 → 1.2 → 1.3 → 1.4"
+					},
+					"response": []
+				},
+				{
+					"name": "1.1 Inicializar Sistema Completo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Sistema inicializado correctamente\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/database/seed",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "database", "seed"]
+						},
+						"description": "**PASO 1:** Inicializa la base de datos con todas las tablas y datos base.\n\nCrea tablas: EDIFICIO, DEPARTAMENTO, GASTO_COMUN, RESPONSABLE_PAGO_GASTO_COMUN, etc.\nInserta datos de edificios (Murano, La Fontana, etc.)\nInserta departamentos por edificio\nInserta residentes responsables de pago\nInserta períodos de cobro\nInserta multas por atraso\n\n**Ejecutar DESPUÉS del paso 1.0 (Clear)**"
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Configurar Sistema de Morosidades",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Paquetes PL/SQL creados\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/database/morosidades",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "database", "morosidades"]
+						},
+						"description": "**PASO 2:** Crea los paquetes PL/SQL y triggers para el sistema de morosidades.\n\nCrea PKG_RESIDENTES (funciones de cálculo)\nCrea PKG_MOROSIDADES (generación de reportes)\nCrea tabla DETALLE_MOROSIDAD\nCrea tabla AUDITORIA_MOROSIDADES\nCrea tabla AUDITORIA_PAGOS\nConfigura triggers automáticos\n\n**Ejecutar DESPUÉS del paso 1.1 (Seed)**"
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 Cargar Datos de Morosidad",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Datos de morosidad insertados\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql('success');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/database/datos-morosidad",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "database", "datos-morosidad"]
+						},
+						"description": "**PASO 3:** Inserta datos de prueba con personas morosas.\n\nInserta 8 casos de morosidad en diferentes estados\nIncluye deudas pendientes totales\nIncluye pagos parciales\nTotal deuda: $692,750\n\n**Casos insertados:**\n1. ALICIA OPAZO - $59,000 (Edificio 10, Depto 21)\n2. STEPHANIE DIAZ - $32,450 con pago parcial (Edificio 10, Depto 22)\n3. SANDRA ARIAS - $119,500 DEUDA ALTA (Edificio 10, Depto 23)\n4. MARCIA BENITEZ - $196,650 en 3 meses (Edificio 10, Depto 31)\n5. VALESKA GODOY - $62,000 con pago mínimo (Edificio 10, Depto 32)\n6. LUIS ALVAREZ - $91,900 con servicios extra (Edificio 10, Depto 33)\n7. HERNAN CASTRO - $41,250 (Edificio 20, Depto 101)\n8. PAMELA GATICA - $90,000 en 2 meses (Edificio 20, Depto 102)\n\n**Ejecutar DESPUÉS del paso 1.2 (Morosidades)**\n\n⚠️ **IMPORTANTE:** Después de este paso, DEBES ejecutar el paso **2a (Generar Reporte de Morosidades)** con annoMes=202510 para que los datos aparezcan en la tabla DETALLE_MOROSIDAD. Sin ejecutar 2a, las consultas 3c y 3d estarán VACÍAS."
+					},
+					"response": []
+				},
+				{
+					"name": "1.4 Verificar Estado del Sistema",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Verificar paquetes creados\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.objetos).to.be.an('array');",
+									"    pm.expect(jsonData.tablas).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/database/diagnostico",
+							"host": ["{{base_url}}"],
+							"path": ["api", "admin", "database", "diagnostico"]
+						},
+						"description": "**DIAGNÓSTICO:** Verifica que todo se haya creado correctamente.\n\nLista paquetes PL/SQL (PKG_RESIDENTES, PKG_MOROSIDADES)\nLista tablas creadas (DETALLE_MOROSIDAD, AUDITORIA_MOROSIDADES, AUDITORIA_PAGOS)\nMuestra errores de compilación si existen\nVerifica estado de los objetos (VALID/INVALID)\n\n**Resultado esperado:**\n- PKG_RESIDENTES: VALID\n- PKG_MOROSIDADES: VALID\n- 3 tablas creadas\n- 0 errores de compilación\n\n**Usar después de completar pasos 1.0 a 1.3**"
+					},
+					"response": []
+				}
+			],
+			"description": "## 1. Inicializar Base de Datos\n\n**ORDEN OBLIGATORIO DE EJECUCIÓN:**\n\n1. **1.0** Limpiar Base de Datos (Clear)\n2. **1.1** Inicializar Sistema Completo (Seed)\n3. **1.2** Configurar Sistema de Morosidades (Scripts PL/SQL)\n4. **1.3** Cargar Datos de Morosidad (8 casos de prueba)\n5. **1.4** Verificar Estado del Sistema (Diagnóstico)\n\n**Ejecutar estos pasos solo:**\n- La primera vez que usas el sistema\n- Cuando necesites reiniciar todo desde cero\n- Si hay errores en los datos"
+		},
+		{
+			"name": "2. Gestionar Morosidades",
+			"item": [
+				{
+					"name": "2a. Generar Reporte de Morosidades",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Reporte generado exitosamente\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"annoMes\": 202510\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/morosidades/generar-reporte",
+							"host": ["{{base_url}}"],
+							"path": ["api", "morosidades", "generar-reporte"]
+						},
+						"description": "## 2a. Generar Reporte de Morosidades\n\n**Función:** Procesa todas las deudas pendientes y genera el reporte de morosidades.\n\n**Parámetros:**\n- `annoMes`: Período hasta el cual generar el reporte (AAAAMM)\n  - Ejemplo: 202510 = Octubre 2025\n\n**Proceso:**\n1. Analiza gastos comunes pendientes\n2. Calcula días de mora\n3. Actualiza tabla DETALLE_MOROSIDAD\n4. Registra auditorías si deuda > $100,000\n\n**Ejecutar:** Cada vez que necesites actualizar los datos de morosidad."
+					},
+					"response": []
+				},
+				{
+					"name": "2b. Consultar Auditoría de Morosidades",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/morosidades/auditoria",
+							"host": ["{{base_url}}"],
+							"path": ["api", "morosidades", "auditoria"]
+						},
+						"description": "## 2b. Consultar Auditoría de Morosidades\n\n**Función:** Muestra el historial de cambios en morosidades mayores a $100,000.\n\n**Retorna:**\n- ID de auditoría\n- RUN del residente\n- Monto moroso anterior\n- Monto moroso nuevo\n- Fecha de la auditoría\n\n**Trigger automático:** TRG_AUDITORIA_MOROSIDAD se dispara cuando una deuda supera $100,000.\n\n**Uso:** Revisar historial de deudas altas."
+					},
+					"response": []
+				},
+				{
+					"name": "2c. Ver Auditoría de Pagos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/morosidades/auditoria-pagos",
+							"host": ["{{base_url}}"],
+							"path": ["api", "morosidades", "auditoria-pagos"]
+						},
+						"description": "## Ver Auditoría de Pagos\n\n**Función:** Muestra TODOS los pagos registrados en el sistema.\n\n**Retorna:**\n- Período de pago\n- Edificio y departamento\n- Monto cancelado\n- Fecha de auditoría\n- Operación (INSERT)\n\n**Trigger automático:** TRG_VALIDAR_AUDITORIA_PAGO se dispara con cada pago.\n\n**Uso:** Revisar historial completo de pagos."
+					},
+					"response": []
+				}
+			],
+			"description": "## 2. Gestionar Morosidades\n\n**Funciones principales:**\n- a. Generar Reporte de Morosidades\n- b. Consultar Auditoría de Morosidades\n- c. Ver Auditoría de Pagos (adicional)"
+		},
+		{
+			"name": "3. Gestionar Residentes",
+			"item": [
+				{
+					"name": "3a. Registrar Pago Parcial",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Pago registrado exitosamente\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"annoMes\": 202507,\n  \"idEdif\": 10,\n  \"nroDepto\": 21,\n  \"monto\": 30000.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/pagos/registrar-parcial",
+							"host": ["{{base_url}}"],
+							"path": ["api", "pagos", "registrar-parcial"]
+						},
+						"description": "## 3a. Registrar Pago Parcial\n\n**Función:** Registra un pago parcial de un residente.\n\n**Parámetros:**\n- `annoMes`: Período del pago (AAAAMM) - DEBE EXISTIR en GASTO_COMUN\n- `idEdif`: ID del edificio\n- `nroDepto`: Número de departamento\n- `monto`: Monto pagado\n\n**Validaciones automáticas:**\n- Monto debe ser positivo\n- Monto no puede exceder $1,000,000\n- Debe existir el gasto común para ese período\n\n**Auditoría:** Se registra automáticamente en AUDITORIA_PAGOS.\n\n**Ejemplo en este request:**\nALICIA OPAZO (RUN: 6868859)\n- Edificio: 10 (Murano)\n- Departamento: 21\n- Período: 202507 (Julio 2025)\n- Deuda inicial: $59,000\n- Pago: $30,000\n- Saldo después: $29,000\n\n**Después de registrar:**\n1. Ejecutar 2a (Generar Reporte)\n2. Ejecutar 3c o 3d (Ver nueva deuda)"
+					},
+					"response": []
+				},
+				{
+					"name": "3c. Mostrar Detalle de Morosidad por Residente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/morosidades/detalle?numrun=8948642",
+							"host": ["{{base_url}}"],
+							"path": ["api", "morosidades", "detalle"],
+							"query": [
+								{
+									"key": "numrun",
+									"value": "8948642",
+									"description": "RUN del residente (SANDRA ARIAS)"
+								}
+							]
+						},
+						"description": "## 3c. Mostrar Detalle de Morosidad por Residente\n\n**Función:** Consulta la morosidad de UN residente específico.\n\n**Parámetros:**\n- `numrun`: RUN del residente (sin dígito verificador)\n\n**Retorna:**\n- ID de morosidad\n- RUN del residente\n- Monto total moroso\n- Fecha de última actualización\n\n**Ejemplo:** Consultar deuda de SANDRA ARIAS (RUN: 8948642)\nResultado esperado: $119,500 pendiente"
+					},
+					"response": []
+				},
+				{
+					"name": "3d. Mostrar TODOS los Residentes Morosos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    if(jsonData.length > 0) {",
+									"        pm.expect(jsonData[0]).to.have.property('numrunRpgc');",
+									"        pm.expect(jsonData[0]).to.have.property('montoTotalMoroso');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/morosidades/detalle",
+							"host": ["{{base_url}}"],
+							"path": ["api", "morosidades", "detalle"]
+						},
+						"description": "## Mostrar TODOS los Residentes Morosos\n\n**Función:** Lista TODOS los residentes con deuda pendiente.\n\n**Sin parámetros:** Retorna todos los registros.\n\n**Retorna:**\n- Lista completa de residentes morosos\n- Monto total de cada deuda\n- Fecha de última actualización\n\n**Ejemplo de respuesta esperada:**\n```json\n[\n  {\n    \"idMorosidad\": 1,\n    \"numrunRpgc\": 6868859,\n    \"montoTotalMoroso\": 59000.00,\n    \"fechaUltimaActualizacion\": \"2025-10-19\"\n  },\n  {\n    \"idMorosidad\": 2,\n    \"numrunRpgc\": 8948642,\n    \"montoTotalMoroso\": 119500.00,\n    \"fechaUltimaActualizacion\": \"2025-10-19\"\n  }\n]\n```\n\n**Total esperado:** 8 residentes morosos con deuda total de $692,750"
+					},
+					"response": []
+				}
+			],
+			"description": "## 3. Gestionar Residentes\n\n**Funciones principales:**\n- a. Registrar Pago Parcial\n- c. Mostrar Detalle de Morosidad por Residente\n- d. Mostrar TODOS los Residentes Morosos"
+		},
+		{
+			"name": "4. Gestionar Edificios",
+			"item": [
+				{
+					"name": "4a. Listar Todos los Edificios",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    if(jsonData.length > 0) {",
+									"        pm.expect(jsonData[0]).to.have.property('idEdif');",
+									"        pm.expect(jsonData[0]).to.have.property('nombreEdif');",
+									"        pm.expect(jsonData[0]).to.have.property('promedioMorosidad');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/edificios",
+							"host": ["{{base_url}}"],
+							"path": ["api", "edificios"]
+						},
+						"description": "## 4a. Listar Todos los Edificios\n\n**Función:** Lista todos los edificios con su información y promedio de morosidad.\n\n**Retorna:**\n- ID del edificio\n- Nombre del edificio\n- Dirección\n- **Promedio de morosidad** (calculado automáticamente)\n\n**Cálculo del promedio:**\nSe usa la función PL/SQL: `PKG_MOROSIDADES.CALCULAR_PROMEDIO_MOROSIDAD_EDIFICIO`\n\n**Ejemplo de respuesta:**\n```json\n[\n  {\n    \"idEdif\": 10,\n    \"nombreEdif\": \"Murano\",\n    \"direccionEdif\": \"Los Militares 4743\",\n    \"promedioMorosidad\": 98183.33\n  },\n  {\n    \"idEdif\": 20,\n    \"nombreEdif\": \"La Fontana\",\n    \"direccionEdif\": \"Cristóbal Colón 3663\",\n    \"promedioMorosidad\": 65625.00\n  }\n]\n```\n\n**Edificios esperados:**\n- Murano (ID: 10) - 6 deudas morosas\n- La Fontana (ID: 20) - 2 deudas morosas\n- María Luisa Santander (ID: 30)\n- Bilbao Blanco (ID: 40)\n- Plaza El Roble (ID: 50)\n- Urbano Ñuñoa (ID: 60)"
+					},
+					"response": []
+				},
+				{
+					"name": "4b. Ver Promedio de Morosidad por Edificio",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains promedioMorosidad\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    if(jsonData.length > 0) {",
+									"        pm.expect(jsonData[0]).to.have.property('promedioMorosidad');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/edificios",
+							"host": ["{{base_url}}"],
+							"path": ["api", "edificios"]
+						},
+						"description": "## 4b. Ver Promedio de Morosidad por Edificio\n\n**Nota:** Este endpoint es el mismo que 4a (Listar Todos los Edificios).\n\nEl promedio de morosidad **ya está incluido** en la respuesta del endpoint 4a.\n\n**Promedio de morosidad:**\n- Se calcula automáticamente para cada edificio\n- Considera solo gastos comunes con estado PENDIENTE o PAGADO PARCIAL\n- Divide el total de deudas entre la cantidad de departamentos con deuda\n\n**Ejemplo:**\nEdificio Murano:\n- Total deudas: $589,100\n- Departamentos con deuda: 6\n- Promedio: $98,183.33\n\n**Función PL/SQL utilizada:**\n`PKG_MOROSIDADES.CALCULAR_PROMEDIO_MOROSIDAD_EDIFICIO(id_edificio)`"
+					},
+					"response": []
+				}
+			],
+			"description": "## 4. Gestionar Edificios\n\n**Funciones principales:**\n- a. Listar Todos los Edificios\n- b. Ver Promedio de Morosidad por Edificio\n\n**Nota:** Ambas funciones usan el mismo endpoint. El promedio de morosidad se calcula automáticamente."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8090",
+			"type": "string"
+		}
+	]
+}

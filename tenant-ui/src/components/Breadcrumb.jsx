@@ -11,6 +11,12 @@ function Breadcrumb() {
   const routeLabels = {
     '/': 'Inicio',
     '/tenants': 'Tenants',
+    '/morosidad': 'Morosidades',
+    '/edificios': 'Edificios',
+    '/auditoria-morosidad': 'Auditoría de Morosidades',
+    '/auditoria-pagos': 'Auditoría de Pagos',
+    '/registro-pagos': 'Registro de Pagos',
+    '/flow': 'Flujo de Prueba',
   };
 
   // Generar breadcrumbs

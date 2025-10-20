@@ -1,0 +1,577 @@
+{
+	"info": {
+		"_postman_id": "flujo-prueba-completo-morosidades",
+		"name": "FLUJO COMPLETO - Prueba de Morosidades",
+		"description": "# FLUJO LINEAL COMPLETO DE PRUEBA\n\n## INSTRUCCIONES:\n\n**Ejecuta los pasos en orden secuencial usando el boton RUN en Postman:**\n\n### Paso a Paso:\n\n1. PASO 1 - Limpiar Base de Datos\n2. PASO 2 - Inicializar Sistema Completo\n3. PASO 3 - Configurar Sistema de Morosidades\n4. PASO 4 - Cargar Datos de Morosidad\n5. PASO 5 - Generar Reporte de Morosidades (CRITICO)\n6. PASO 6 - Ver TODOS los Residentes Morosos\n7. PASO 7 - Ver Detalle de SANDRA ARIAS (RUN: 8948642)\n8. PASO 8 - Registrar Pago Parcial de ALICIA OPAZO\n9. PASO 9 - Regenerar Reporte Actualizado\n10. PASO 10 - Ver Residentes Morosos Actualizados\n11. PASO 11 - Ver Todos los Edificios con Promedios\n12. PASO 12 - Ver Auditoria de Morosidades (deudas > $100k)\n13. PASO 13 - Ver Auditoria de Pagos\n14. PASO 14 - Diagnostico Final del Sistema\n\n---\n\n## Como Ejecutar:\n\n1. Abre Postman\n2. Importa esta coleccion\n3. Haz clic en \"Run\" (boton Runner)\n4. Selecciona TODOS los requests\n5. Haz clic en \"Run Flujo Completo\"\n6. Observa los resultados paso a paso\n\n---\n\n## Resultados Esperados:\n\n- **8 residentes morosos** inicialmente\n- **Deuda total:** $692,750\n- **2 auditorias de morosidades** (SANDRA ARIAS y MARCIA BENITEZ con deuda > $100k)\n- **Al menos 3 pagos registrados** en auditoria\n- **Deuda reducida** despues del pago parcial\n\n---\n\n## Variables:\n- base_url: http://localhost:8090",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "PASO 1 - Limpiar Base de Datos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 1: Base de datos limpiada\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql('success');",
+							"    console.log('PASO 1 COMPLETADO: Base de datos limpiada correctamente');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/admin/database/clear",
+					"host": ["{{base_url}}"],
+					"path": ["api", "admin", "database", "clear"]
+				},
+				"description": "PASO 1: Limpiar Base de Datos\n\nElimina todas las tablas y datos existentes para empezar desde cero."
+			},
+			"response": []
+		},
+		{
+			"name": "PASO 2 - Inicializar Sistema Completo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 2: Sistema inicializado\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql('success');",
+							"    console.log('PASO 2 COMPLETADO: Sistema base inicializado (edificios, departamentos, residentes)');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/admin/database/seed",
+					"host": ["{{base_url}}"],
+					"path": ["api", "admin", "database", "seed"]
+				},
+				"description": "PASO 2: Inicializar Sistema Completo\n\nCrea todas las tablas base y carga datos iniciales:\n- Edificios (6)\n- Departamentos\n- Residentes\n- Periodos de cobro\n- Multas por atraso"
+			},
+			"response": []
+		},
+		{
+			"name": "PASO 3 - Configurar Sistema de Morosidades",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 3: Paquetes PL/SQL creados\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql('success');",
+							"    console.log('PASO 3 COMPLETADO: PKG_RESIDENTES y PKG_MOROSIDADES creados');",
+							"    console.log('Triggers de auditoria activados');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/admin/database/morosidades",
+					"host": ["{{base_url}}"],
+					"path": ["api", "admin", "database", "morosidades"]
+				},
+				"description": "PASO 3: Configurar Sistema de Morosidades\n\nCrea:\n- PKG_RESIDENTES (funciones de calculo)\n- PKG_MOROSIDADES (generacion de reportes)\n- DETALLE_MOROSIDAD (tabla)\n- AUDITORIA_MOROSIDADES (tabla)\n- AUDITORIA_PAGOS (tabla)\n- TRG_VALIDAR_AUDITORIA_PAGO (trigger)\n- TRG_AUDITORIA_MOROSIDAD (trigger)"
+			},
+			"response": []
+		},
+		{
+			"name": "PASO 4 - Cargar Datos de Morosidad",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 4: Datos de morosidad cargados\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql('success');",
+							"    console.log('PASO 4 COMPLETADO: 8 casos de morosidad insertados');",
+							"    console.log('Total deuda: $692,750');",
+							"    console.log('2 pagos parciales registrados (triggers activados)');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/admin/database/datos-morosidad",
+					"host": ["{{base_url}}"],
+					"path": ["api", "admin", "database", "datos-morosidad"]
+				},
+				"description": "PASO 4: Cargar Datos de Morosidad\n\nInserta 8 casos de prueba:\n1. ALICIA OPAZO (RUN: 6868859) - Edificio 10, Depto 21 - $59,000\n2. STEPHANIE DIAZ (RUN: 16044255) - Edificio 10, Depto 22 - $32,450 (con pago parcial)\n3. SANDRA ARIAS (RUN: 8948642) - Edificio 10, Depto 23 - $119,500 (DEUDA ALTA)\n4. MARCIA BENITEZ (RUN: 17046055) - Edificio 10, Depto 31 - $196,650 (DEUDA ALTA - 3 meses)\n5. VALESKA GODOY (RUN: 13635211) - Edificio 10, Depto 32 - $62,000 (con pago minimo)\n6. LUIS ALVAREZ (RUN: 16439752) - Edificio 10, Depto 33 - $91,900\n7. HERNAN CASTRO (RUN: 21815820) - Edificio 20, Depto 101 - $41,250\n8. PAMELA GATICA (RUN: 16947140) - Edificio 20, Depto 102 - $90,000 (2 meses)\n\nNOTA: Este paso LIMPIA los periodos 202507-202509 antes de insertar.\nNOTA: Inserta 2 pagos parciales que activan el trigger de auditoria."
+			},
+			"response": []
+		},
+		{
+			"name": "PASO 5 - Generar Reporte de Morosidades (CRITICO)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 5: Reporte generado exitosamente\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"    console.log('PASO 5 COMPLETADO - PASO CRITICO EJECUTADO');",
+							"    console.log('Tabla DETALLE_MOROSIDAD poblada');",
+							"    console.log('Auditorias de deudas > $100k registradas');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"annoMes\": 202510\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/morosidades/generar-reporte",
+					"host": ["{{base_url}}"],
+					"path": ["api", "morosidades", "generar-reporte"]
+				},
+				"description": "PASO 5: Generar Reporte de Morosidades (CRITICO)\n\n**Este es el paso mas importante:**\n\nProcesa todos los gastos comunes y:\n1. Calcula deudas totales por residente\n2. Calcula dias de mora\n3. **Llena DETALLE_MOROSIDAD** (SIN ESTO, LAS CONSULTAS ESTARAN VACIAS)\n4. Activa trigger de auditoria para deudas > $100,000\n\nParametro:\n- annoMes: 202510 (procesa hasta Octubre 2025)\n\nSIN EJECUTAR ESTE PASO, LOS PASOS 6, 7, 10 ESTARAN VACIOS."
+			},
+			"response": []
+		},
+		{
+			"name": "PASO 6 - Ver TODOS los Residentes Morosos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 6: Lista de morosos obtenida\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"    console.log('Total de residentes morosos: ' + jsonData.length);",
+							"    ",
+							"    if (jsonData.length > 0) {",
+							"        var total = 0;",
+							"        jsonData.forEach(function(item) {",
+							"            total += item.montoTotalMoroso;",
+							"            console.log('  - RUN: ' + item.numrun + ' | Deuda: $' + item.montoTotalMoroso.toLocaleString());",
+							"        });",
+							"        console.log('Deuda total: $' + total.toLocaleString());",
+							"        pm.expect(jsonData.length).to.be.at.least(8);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/morosidades/detalle",
+					"host": ["{{base_url}}"],
+					"path": ["api", "morosidades", "detalle"]
+				},
+				"description": "PASO 6: Ver TODOS los Residentes Morosos\n\nConsulta la tabla DETALLE_MOROSIDAD para ver todos los residentes con deuda.\n\n**Resultado esperado:**\n- 8 residentes morosos\n- Deuda total: $692,750"
+			},
+			"response": []
+		},
+		{
+			"name": "PASO 7 - Ver Detalle de SANDRA ARIAS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 7: Detalle de SANDRA ARIAS\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"    ",
+							"    if (jsonData.length > 0) {",
+							"        var sandra = jsonData[0];",
+							"        console.log('Residente: ' + sandra.nombreCompleto);",
+							"        console.log('RUN: ' + sandra.numrun);",
+							"        console.log('Deuda: $' + sandra.montoTotalMoroso.toLocaleString());",
+							"        console.log('Última actualización: ' + sandra.fechaUltimaActualizacion);",
+							"        pm.expect(sandra.montoTotalMoroso).to.eql(119500);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/morosidades/detalle?numrun=8948642",
+					"host": ["{{base_url}}"],
+					"path": ["api", "morosidades", "detalle"],
+					"query": [
+						{
+							"key": "numrun",
+							"value": "8948642",
+							"description": "RUN de SANDRA ARIAS"
+						}
+					]
+				},
+				"description": "PASO 7: Ver Detalle de SANDRA ARIAS\n\nConsulta específica de un residente moroso.\n\n**Residente:** SANDRA ARIAS\n**RUN:** 8948642\n**Deuda esperada:** $119,500 (deuda alta que activó auditoría)"
+			},
+			"response": []
+		},
+		{
+			"name": "PASO 8 - Registrar Pago Parcial de ALICIA",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 8: Pago parcial registrado\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"    console.log('Pago registrado: $30,000');",
+							"    console.log('Residente: ALICIA OPAZO (RUN: 6868859)');",
+							"    console.log('Edificio: 10 (Murano) - Depto: 21');",
+							"    console.log('Trigger de auditoría activado');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"annoMes\": 202508,\n  \"idEdif\": 10,\n  \"nroDepto\": 21,\n  \"monto\": 30000.00\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/pagos/registrar-parcial",
+					"host": ["{{base_url}}"],
+					"path": ["api", "pagos", "registrar-parcial"]
+				},
+				"description": "PASO 8: Registrar Pago Parcial\n\nResidente: ALICIA OPAZO (RUN: 6868859)\nEdificio: 10 (Murano)\nDepartamento: 21\nPeriodo: 202508 (Agosto 2025)\nDeuda inicial: $59,000\nPago: $30,000\nSaldo después: $29,000\n\nNota: Este pago activa el trigger TRG_VALIDAR_AUDITORIA_PAGO"
+			},
+			"response": []
+		},
+		{
+			"name": "PASO 9 - Regenerar Reporte Actualizado",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 9: Reporte actualizado\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.eql(true);",
+							"    console.log('Reporte regenerado con pagos actualizados');",
+							"    console.log('Deuda de ALICIA reducida de $59,000 a $29,000');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"annoMes\": 202510\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/morosidades/generar-reporte",
+					"host": ["{{base_url}}"],
+					"path": ["api", "morosidades", "generar-reporte"]
+				},
+				"description": "PASO 9: Regenerar Reporte Actualizado\n\nVuelve a generar el reporte para reflejar el pago parcial registrado en el paso anterior.\n\n**Resultado esperado:**\n- Deuda de ALICIA OPAZO reducida a $29,000"
+			},
+			"response": []
+		},
+		{
+			"name": "PASO 10 - Ver Residentes Morosos Actualizados",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 10: Deudas actualizadas\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"    ",
+							"    var alicia = jsonData.find(item => item.numrun === 6868859);",
+							"    if (alicia) {",
+							"        console.log('ALICIA OPAZO - Deuda actualizada: $' + alicia.montoTotalMoroso.toLocaleString());",
+							"        pm.expect(alicia.montoTotalMoroso).to.eql(29000);",
+							"    }",
+							"    ",
+							"    var total = 0;",
+							"    jsonData.forEach(function(item) {",
+							"        total += item.montoTotalMoroso;",
+							"    });",
+							"    console.log('Nueva deuda total: $' + total.toLocaleString());",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/morosidades/detalle",
+					"host": ["{{base_url}}"],
+					"path": ["api", "morosidades", "detalle"]
+				},
+				"description": "PASO 10: Ver Residentes Morosos Actualizados\n\nConsulta la lista actualizada después del pago parcial.\n\n**Verificar:**\n- Deuda de ALICIA OPAZO reducida a $29,000\n- Deuda total del sistema reducida"
+			},
+			"response": []
+		},
+		{
+			"name": "PASO 11 - Ver Todos los Edificios",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 11: Edificios con promedios\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"    pm.expect(jsonData.length).to.be.at.least(6);",
+							"    ",
+							"    console.log('Edificios con promedio de morosidad:');",
+							"    jsonData.forEach(function(edificio) {",
+							"        if (edificio.promedioMorosidad > 0) {",
+							"            console.log('  ' + edificio.nombreEdif + ' - Promedio: $' + edificio.promedioMorosidad.toLocaleString());",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/edificios",
+					"host": ["{{base_url}}"],
+					"path": ["api", "edificios"]
+				},
+				"description": "PASO 11: Ver Todos los Edificios\n\nLista todos los edificios con su promedio de morosidad calculado.\n\n**Edificios esperados:**\n- Murano (ID: 10) - Mayor promedio de morosidad\n- La Fontana (ID: 20) - Segundo mayor promedio\n- Otros edificios sin morosidad"
+			},
+			"response": []
+		},
+		{
+			"name": "PASO 12 - Ver Auditoría de Morosidades",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 12: Auditoría de morosidades\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"    ",
+							"    console.log('Auditorías de morosidades (deudas > $100,000):');",
+							"    if (jsonData.length > 0) {",
+							"        jsonData.forEach(function(audit) {",
+							"            console.log('  RUN: ' + audit.numrun + ' | Anterior: $' + (audit.montoMorosoAnterior || 0) + ' → Nuevo: $' + audit.montoMorosoNuevo);",
+							"        });",
+							"        pm.expect(jsonData.length).to.be.at.least(2);",
+							"    } else {",
+							"        console.log('  No hay auditorías registradas (deudas < $100,000)');",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/morosidades/auditoria",
+					"host": ["{{base_url}}"],
+					"path": ["api", "morosidades", "auditoria"]
+				},
+				"description": "PASO 12: Ver Auditoría de Morosidades\n\nMuestra el historial de cambios en morosidades mayores a $100,000.\n\n**Trigger:** TRG_AUDITORIA_MOROSIDAD\n**Se activa cuando:** Una deuda supera los $100,000\n\n**Registros esperados:**\n1. SANDRA ARIAS (RUN: 8948642) - $119,500\n2. MARCIA BENITEZ (RUN: 17046055) - $196,650"
+			},
+			"response": []
+		},
+		{
+			"name": "PASO 13 - Ver Auditoría de Pagos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 13: Auditoría de pagos\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"    ",
+							"    console.log('Auditoría de pagos registrados:');",
+							"    if (jsonData.length > 0) {",
+							"        var total = 0;",
+							"        jsonData.forEach(function(pago) {",
+							"            console.log('  ' + pago.fechaAuditoria + ' | Edificio: ' + pago.idEdif + ' Depto: ' + pago.nroDepto + ' | Monto: $' + pago.montoCancelado.toLocaleString());",
+							"            total += pago.montoCancelado;",
+							"        });",
+							"        console.log('Total pagado: $' + total.toLocaleString());",
+							"        pm.expect(jsonData.length).to.be.at.least(3);",
+							"    } else {",
+							"        console.log('  No hay pagos registrados en auditoría');",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/morosidades/auditoria-pagos",
+					"host": ["{{base_url}}"],
+					"path": ["api", "morosidades", "auditoria-pagos"]
+				},
+				"description": "PASO 13: Ver Auditoría de Pagos\n\nMuestra TODOS los pagos registrados en el sistema.\n\n**Trigger:** TRG_VALIDAR_AUDITORIA_PAGO\n**Se activa cuando:** Se inserta un registro en PAGO_GASTO_COMUN\n\n**Pagos esperados:**\n1. Pago parcial de STEPHANIE DIAZ ($20,000) - del script datos_morosidad.sql\n2. Pago parcial de VALESKA GODOY ($10,000) - del script datos_morosidad.sql\n3. Pago parcial de ALICIA OPAZO ($30,000) - del PASO 8"
+			},
+			"response": []
+		},
+		{
+			"name": "PASO 14 - Diagnóstico Final del Sistema",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PASO 14: Diagnóstico completo\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.objetos).to.be.an('array');",
+							"    pm.expect(jsonData.tablas).to.be.an('array');",
+							"    ",
+							"    console.log('Diagnóstico del Sistema:');",
+							"    console.log('Paquetes PL/SQL:');",
+							"    jsonData.objetos.forEach(function(obj) {",
+							"        console.log('  ' + obj.object_name + ' - ' + obj.status);",
+							"    });",
+							"    ",
+							"    console.log('Tablas creadas:');",
+							"    jsonData.tablas.forEach(function(tabla) {",
+							"        console.log('  ' + tabla.table_name);",
+							"    });",
+							"    ",
+							"    if (jsonData.errores && jsonData.errores.length > 0) {",
+							"        console.log('Errores encontrados:');",
+							"        jsonData.errores.forEach(function(error) {",
+							"            console.log('  ' + error);",
+							"        });",
+							"    } else {",
+							"        console.log('Sistema sin errores');",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/admin/database/diagnostico",
+					"host": ["{{base_url}}"],
+					"path": ["api", "admin", "database", "diagnostico"]
+				},
+				"description": "PASO 14: Diagnóstico Final del Sistema\n\nVerifica que todo esté funcionando correctamente:\n\n**Verifica:**\n- Paquetes PL/SQL (PKG_RESIDENTES, PKG_MOROSIDADES) - VALID\n- Tablas creadas (DETALLE_MOROSIDAD, AUDITORIA_MOROSIDADES, AUDITORIA_PAGOS)\n- Errores de compilación\n\n**Estado esperado:**\n- ✅ Todos los objetos VALID\n- ✅ Sin errores de compilación"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"console.log('Ejecutando: ' + pm.info.requestName);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"console.log('---');"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8090",
+			"type": "string"
+		}
+	]
+}
