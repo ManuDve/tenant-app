@@ -115,12 +115,17 @@ CREATE OR REPLACE PACKAGE BODY PKG_RESIDENTES AS
 
     PROCEDURE REGISTRAR_PAGO_PARCIAL(p_anno_mes NUMBER, p_id_edif NUMBER, p_nro_depto NUMBER, p_monto NUMBER) IS
         v_count NUMBER;
+        v_monto_total_gc NUMBER;
+        v_total_pagado NUMBER;
+        v_nuevo_total_pagado NUMBER;
     BEGIN
         IF p_monto IS NULL OR p_monto <= 0 THEN
             RAISE_APPLICATION_ERROR(-20002, 'El monto debe ser mayor a cero');
         END IF;
 
-        SELECT COUNT(*) INTO v_count
+        -- Verificar que existe el gasto común
+        SELECT COUNT(*), MAX(monto_total_gc)
+        INTO v_count, v_monto_total_gc
         FROM GASTO_COMUN
         WHERE anno_mes_pcgc = p_anno_mes
           AND id_edif = p_id_edif
@@ -130,6 +135,23 @@ CREATE OR REPLACE PACKAGE BODY PKG_RESIDENTES AS
             RAISE_APPLICATION_ERROR(-20003, 'No existe gasto común para ese período y departamento');
         END IF;
 
+        -- Obtener el total ya pagado
+        SELECT NVL(SUM(monto_cancelado_pgc), 0)
+        INTO v_total_pagado
+        FROM PAGO_GASTO_COMUN
+        WHERE anno_mes_pcgc = p_anno_mes
+          AND id_edif = p_id_edif
+          AND nro_depto = p_nro_depto;
+
+        -- Calcular el nuevo total pagado
+        v_nuevo_total_pagado := v_total_pagado + p_monto;
+
+        -- Validar que no se pague más de lo debido
+        IF v_nuevo_total_pagado > v_monto_total_gc THEN
+            RAISE_APPLICATION_ERROR(-20004, 'El monto total a pagar excede la deuda. Deuda: ' || v_monto_total_gc || ', Ya pagado: ' || v_total_pagado || ', Saldo pendiente: ' || (v_monto_total_gc - v_total_pagado));
+        END IF;
+
+        -- Registrar el pago
         INSERT INTO PAGO_GASTO_COMUN (
             anno_mes_pcgc,
             id_edif,
@@ -145,6 +167,15 @@ CREATE OR REPLACE PACKAGE BODY PKG_RESIDENTES AS
             p_monto,
             2
         );
+
+        -- Si el pago completa la deuda, actualizar el estado a PAGADO (id_epago = 1)
+        IF v_nuevo_total_pagado >= v_monto_total_gc THEN
+            UPDATE GASTO_COMUN
+            SET id_epago = 1
+            WHERE anno_mes_pcgc = p_anno_mes
+              AND id_edif = p_id_edif
+              AND nro_depto = p_nro_depto;
+        END IF;
 
         COMMIT;
     EXCEPTION
@@ -172,11 +203,30 @@ CREATE OR REPLACE PACKAGE BODY PKG_MOROSIDADES AS
             RAISE_APPLICATION_ERROR(-20001, 'El parámetro anno_mes_hasta no puede ser nulo');
         END IF;
 
+        -- Primero limpiar registros que ya no tienen deuda
+        DELETE FROM DETALLE_MOROSIDAD
+        WHERE numrun_rpgc IN (
+            SELECT DISTINCT gc.numrun_rpgc
+            FROM GASTO_COMUN gc
+            WHERE gc.id_epago = 1  -- PAGADO completamente
+              AND gc.anno_mes_pcgc <= p_anno_mes_hasta
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM GASTO_COMUN gc2
+                  WHERE gc2.numrun_rpgc = gc.numrun_rpgc
+                    AND gc2.id_epago IN (2, 3)  -- Tiene otras deudas pendientes
+                    AND gc2.anno_mes_pcgc <= p_anno_mes_hasta
+              )
+        );
+
+        COMMIT;
+
+        -- Procesar residentes con deudas
         FOR rec_residente IN (
             SELECT DISTINCT gc.numrun_rpgc
             FROM GASTO_COMUN gc
             WHERE gc.anno_mes_pcgc <= p_anno_mes_hasta
-              AND gc.id_epago IN (2, 3)
+              AND gc.id_epago IN (2, 3)  -- Solo deudas pendientes
         ) LOOP
             v_monto_residente := 0;
 
@@ -190,7 +240,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_MOROSIDADES AS
                 FROM GASTO_COMUN gc
                 WHERE gc.numrun_rpgc = rec_residente.numrun_rpgc
                   AND gc.anno_mes_pcgc <= p_anno_mes_hasta
-                  AND gc.id_epago IN (2, 3)
+                  AND gc.id_epago IN (2, 3)  -- Solo deudas pendientes
             ) LOOP
                 v_pagado := PKG_RESIDENTES.obtener_monto_pagado(
                     rec_gasto.anno_mes_pcgc,
@@ -212,6 +262,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_MOROSIDADES AS
                 END IF;
             END LOOP;
 
+            -- Solo insertar o actualizar si hay deuda pendiente
             IF v_monto_residente > 0 THEN
                 MERGE INTO DETALLE_MOROSIDAD dm
                 USING DUAL
@@ -223,6 +274,10 @@ CREATE OR REPLACE PACKAGE BODY PKG_MOROSIDADES AS
                 WHEN NOT MATCHED THEN
                     INSERT (numrun_rpgc, monto_total_moroso, fecha_ultima_actualizacion)
                     VALUES (rec_residente.numrun_rpgc, v_monto_residente, SYSDATE);
+            ELSE
+                -- Si no hay deuda, eliminar el registro si existe
+                DELETE FROM DETALLE_MOROSIDAD
+                WHERE numrun_rpgc = rec_residente.numrun_rpgc;
             END IF;
         END LOOP;
 
