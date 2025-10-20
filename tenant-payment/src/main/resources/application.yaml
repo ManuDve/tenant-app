@@ -18,5 +18,14 @@ spring:
       hibernate:
         format_sql: true
 
+app:
+  admin:
+    endpoints:
+      enabled: true
+    sql:
+      clear-path: /Users/mdave/Dev/Duoc/tenant-app/tenant-payment/src/main/resources/sql/clear.sql
+      seed-path: /Users/mdave/Dev/Duoc/tenant-app/tenant-payment/src/main/resources/sql/seed.sql
+      morosidades-path: /Users/mdave/Dev/Duoc/tenant-app/tenant-payment/src/main/resources/sql/setup_morosidades.sql
+
 server:
   port: 8090
